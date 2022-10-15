@@ -1,0 +1,16 @@
+package com.udacity.project4.utils
+
+object Constants {
+    const val KEY_FINE_LOCATION_PERMISSION_REQUEST_CODE = 1
+    const val KEY_TURN_DEVICE_LOCATION_ON_REQUEST_CODE = 35
+    const val KEY_GEOFENCE_RADIUS_IN_METERS = 100f
+    const val KEY_FINE_LOCATION_REQUEST_CODE = 33
+    const val KEY_REMAINDER_DATA = "KEY_REMAINDER_DATA"
+    const val KEY_BACKGROUND_LOCATIONS_REQUEST_CODE = 34
+    const val KEY_FINE_LOCATION_PERMISSION = 0
+    const val KEY_BACKGROUND_LOCATION_PERMISSION = 1
+    const val KEY_CODE_SIGNIN = 1001
+    const val KEY_ACTION_GEOFENCE_EVENT = "locationreminders.geofence.action.KEY_ACTION_GEOFENCE_EVENT"
+
+
+}
