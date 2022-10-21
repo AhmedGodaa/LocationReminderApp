@@ -6,21 +6,31 @@ import com.udacity.project4.locationreminders.data.dto.Result
 
 class FakeDataSource : ReminderDataSource {
 
-    private var errorChecker = false
+    private var shouldReturnError = false
 
     var reminderList = mutableListOf<ReminderDTO>()
 
-    override suspend fun deleteAllReminders() { reminderList.clear() }
+    override suspend fun deleteAllReminders() {
+        reminderList.clear()
+    }
 
-    fun setErrorChecker(value: Boolean) { errorChecker = value }
-    override suspend fun saveReminder(reminder: ReminderDTO) { reminderList.add(reminder) }
+    fun setErrorChecker(value: Boolean) {
+        shouldReturnError = value
+    }
+
+    override suspend fun saveReminder(reminder: ReminderDTO) {
+        reminderList.add(reminder)
+    }
 
 
     override suspend fun getReminders(): Result<List<ReminderDTO>> {
         return try {
-            if (errorChecker) { throw Exception("Reminders can't be found") }
-            Result.Success(ArrayList(reminderList)) } catch (ex: Exception) {
-            Result.Error(ex.localizedMessage)
+            if (shouldReturnError)
+                throw Exception("Reminder not found")
+            else
+                reminderList.let { return@let Result.Success(ArrayList(reminderList)) }
+        } catch (ex: Exception) {
+            return Result.Error(ex.localizedMessage)
         }
     }
 
@@ -29,13 +39,15 @@ class FakeDataSource : ReminderDataSource {
 
         return try {
             val reminder = reminderList.find { it.id == id }
-            if (errorChecker || reminder == null) { throw Exception("Not found $id") }
-            else { Result.Success(reminder) }
+            if (shouldReturnError || reminder == null) {
+                throw Exception("Reminder not found")
+            } else {
+                Result.Success(reminder)
+            }
+        } catch (ex: Exception) {
+            Result.Error(ex.localizedMessage)
         }
-        catch (ex: Exception) { Result.Error(ex.localizedMessage) }
     }
-
-
 
 
 }

@@ -6,7 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
-import com.udacity.project4.locationreminders.rule.CoroutineRule
+import com.udacity.project4.locationreminders.CoroutineRule
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
@@ -17,8 +17,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.robolectric.annotation.Config
 
@@ -64,14 +62,14 @@ class SaveReminderViewModelTest {
 
 
     @Test
-    fun errorChecker() = runBlockingTest {
+    fun shouldReturnError() = runBlockingTest {
         val result = viewModelInstance.validateEnteredData(createIncompleteReminderDataItem())
         MatcherAssert.assertThat(result, CoreMatchers.`is`(false))
     }
 
 
     @Test
-    fun loadingState() = runBlockingTest {
+    fun check_loading() = runBlockingTest {
         coroutineRule.pauseDispatcher()
         viewModelInstance.saveReminder(testReminderItem())
         MatcherAssert.assertThat(viewModelInstance.showLoading.value, CoreMatchers.`is`(true))

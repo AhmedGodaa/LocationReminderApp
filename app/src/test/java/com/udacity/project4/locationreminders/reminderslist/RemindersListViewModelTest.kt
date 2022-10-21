@@ -6,7 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
-import com.udacity.project4.locationreminders.rule.CoroutineRule
+import com.udacity.project4.locationreminders.CoroutineRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.CoreMatchers
@@ -35,7 +35,7 @@ class RemindersListViewModelTest : AutoCloseKoinTest() {
 
 
     @Test
-    fun loadingState() = runBlockingTest {
+    fun check_loading() = runBlockingTest {
         mainCoroutineRule.pauseDispatcher()
         saveReminderFakeData()
         viewModelReminder.loadReminders()
@@ -45,11 +45,11 @@ class RemindersListViewModelTest : AutoCloseKoinTest() {
     }
 
     @Test
-    fun testErrorChecker () = runBlockingTest  {
+    fun shouldReturnError () = runBlockingTest  {
         reminderDataSource.setErrorChecker(true)
         saveReminderFakeData()
         viewModelReminder.loadReminders()
-        MatcherAssert.assertThat(viewModelReminder.showSnackBar.value, CoreMatchers.`is`("Reminders can't be found"))
+        MatcherAssert.assertThat(viewModelReminder.showSnackBar.value, CoreMatchers.`is`("Reminder not found"))
     }
 
 
