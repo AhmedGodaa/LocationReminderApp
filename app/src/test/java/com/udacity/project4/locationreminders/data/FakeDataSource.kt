@@ -26,7 +26,7 @@ class FakeDataSource : ReminderDataSource {
     override suspend fun getReminders(): Result<List<ReminderDTO>> {
         return try {
             if (shouldReturnError)
-                throw Exception("Reminder not found")
+                throw Exception("Reminder not found!")
             else
                 reminderList.let { return@let Result.Success(ArrayList(reminderList)) }
         } catch (ex: Exception) {
@@ -40,7 +40,7 @@ class FakeDataSource : ReminderDataSource {
         return try {
             val reminder = reminderList.find { it.id == id }
             if (shouldReturnError || reminder == null) {
-                throw Exception("Reminder not found")
+                throw Exception("Reminder not found!")
             } else {
                 Result.Success(reminder)
             }
