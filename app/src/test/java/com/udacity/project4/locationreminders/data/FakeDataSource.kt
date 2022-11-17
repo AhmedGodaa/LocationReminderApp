@@ -10,43 +10,53 @@ class FakeDataSource : ReminderDataSource {
 
     var reminderList = mutableListOf<ReminderDTO>()
 
+
+
+
+
+
     override suspend fun deleteAllReminders() {
         reminderList.clear()
     }
 
-    fun setErrorChecker(value: Boolean) {
-        shouldReturnError = value
-    }
+
 
     override suspend fun saveReminder(reminder: ReminderDTO) {
         reminderList.add(reminder)
     }
 
 
-    override suspend fun getReminders(): Result<List<ReminderDTO>> {
-        return try {
-            if (shouldReturnError)
-                throw Exception("Reminder not found!")
-            else
-                reminderList.let { return@let Result.Success(ArrayList(reminderList)) }
+    override suspend fun getReminders(): Result<List<ReminderDTO>> =
+        try {
+            if (shouldReturnError) {
+                throw Exception("Location reminders were unable to be retrieved due to exception occurs")
+            }
+            Result.Success(reminderList)
         } catch (ex: Exception) {
-            return Result.Error(ex.localizedMessage)
+            Result.Error(ex.localizedMessage)
         }
-    }
 
 
-    override suspend fun getReminder(id: String): Result<ReminderDTO> {
 
-        return try {
-            val reminder = reminderList.find { it.id == id }
-            if (shouldReturnError || reminder == null) {
-                throw Exception("Reminder not found!")
+    override suspend fun getReminder(id: String): Result<ReminderDTO> =
+        try {
+            val firstOrNull = reminderList.firstOrNull { it.id == id }
+            if (shouldReturnError) {
+                throw Exception("Location reminder with $id was unable to be retrieved due to exception occurs")
+            } else if (firstOrNull == null) {
+                Result.Error("Reminder not found!")
             } else {
-                Result.Success(reminder)
+                Result.Success(firstOrNull)
             }
         } catch (ex: Exception) {
             Result.Error(ex.localizedMessage)
         }
+
+
+
+
+    fun setError(shouldReturnError: Boolean) {
+        this.shouldReturnError = shouldReturnError
     }
 
 

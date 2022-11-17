@@ -4,13 +4,14 @@ import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.udacity.project4.locationreminders.CoroutineRule
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
-import com.udacity.project4.locationreminders.CoroutineRule
+import com.udacity.project4.locationreminders.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import org.hamcrest.CoreMatchers
-import org.hamcrest.MatcherAssert
+import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -23,8 +24,9 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.P])
 class RemindersListViewModelTest : AutoCloseKoinTest() {
 
-     lateinit var viewModelReminder: RemindersListViewModel
-     lateinit var reminderDataSource: FakeDataSource
+    lateinit var viewModelReminder: RemindersListViewModel
+    lateinit var reminderDataSource: FakeDataSource
+
 
     @get:Rule
     var mainCoroutineRule = CoroutineRule()
@@ -34,24 +36,45 @@ class RemindersListViewModelTest : AutoCloseKoinTest() {
 
 
 
+
     @Test
-    fun check_loading() = runBlockingTest {
+    fun check_loading() = mainCoroutineRule.runBlockingTest {
+        reminderDataSource.deleteAllReminders()
+        val reminder = ReminderDTO(
+            title = "test",
+            description = "test",
+            location = "test",
+            latitude = 88.00,
+            longitude = 88.00
+        )
+        reminderDataSource.saveReminder(reminder)
+
         mainCoroutineRule.pauseDispatcher()
-        saveReminderFakeData()
         viewModelReminder.loadReminders()
-        MatcherAssert.assertThat(viewModelReminder.showLoading.value, CoreMatchers.`is`(true))
+
+        assertThat(viewModelReminder.showLoading.getOrAwaitValue(), `is`(true))
         mainCoroutineRule.resumeDispatcher()
-        MatcherAssert.assertThat(viewModelReminder.showLoading.value, CoreMatchers.`is`(false))
+
+        assertThat(viewModelReminder.showLoading.getOrAwaitValue(), `is`(false))
+
+//        assertThat(viewModelReminder.showNoData.getOrAwaitValue(), `is`(true))
+
+
+
+
     }
+
 
     @Test
-    fun shouldReturnError () = runBlockingTest  {
-        reminderDataSource.setErrorChecker(true)
-        saveReminderFakeData()
-        viewModelReminder.loadReminders()
-        MatcherAssert.assertThat(viewModelReminder.showSnackBar.value, CoreMatchers.`is`("Reminder not found!"))
-    }
+    fun returnError() = mainCoroutineRule.runBlockingTest {
 
+        reminderDataSource.setError(false)
+        viewModelReminder.loadReminders()
+        advanceUntilIdle()
+        var value = viewModelReminder.showSnackBar.getOrAwaitValue()
+        assertThat(value, `is`("Reminder not found!"))
+
+    }
 
 
     private suspend fun saveReminderFakeData() {
@@ -61,7 +84,8 @@ class RemindersListViewModelTest : AutoCloseKoinTest() {
     @Before
     fun prepareViewModel() {
         reminderDataSource = FakeDataSource()
-        viewModelReminder = RemindersListViewModel(ApplicationProvider.getApplicationContext(), reminderDataSource)
+        viewModelReminder =
+            RemindersListViewModel(ApplicationProvider.getApplicationContext(), reminderDataSource)
     }
 
 }
