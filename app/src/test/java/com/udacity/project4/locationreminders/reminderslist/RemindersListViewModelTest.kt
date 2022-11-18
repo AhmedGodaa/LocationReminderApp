@@ -39,7 +39,7 @@ class RemindersListViewModelTest : AutoCloseKoinTest() {
 
     @Test
     fun check_loading() = mainCoroutineRule.runBlockingTest {
-        reminderDataSource.deleteAllReminders()
+
         val reminder = ReminderDTO(
             title = "test",
             description = "test",
@@ -51,13 +51,17 @@ class RemindersListViewModelTest : AutoCloseKoinTest() {
 
         mainCoroutineRule.pauseDispatcher()
         viewModelReminder.loadReminders()
+        reminderDataSource.deleteAllReminders()
+
+
 
         assertThat(viewModelReminder.showLoading.getOrAwaitValue(), `is`(true))
         mainCoroutineRule.resumeDispatcher()
 
         assertThat(viewModelReminder.showLoading.getOrAwaitValue(), `is`(false))
 
-//        assertThat(viewModelReminder.showNoData.getOrAwaitValue(), `is`(true))
+
+        assertThat(viewModelReminder.showNoData.getOrAwaitValue(), `is`(true))
 
 
 
@@ -68,18 +72,23 @@ class RemindersListViewModelTest : AutoCloseKoinTest() {
     @Test
     fun returnError() = mainCoroutineRule.runBlockingTest {
 
-        reminderDataSource.setError(false)
+        reminderDataSource.saveReminder(
+            ReminderDTO(
+                "test",
+                "test",
+                "test",
+                88.00,
+                88.00
+            )
+        )
+        reminderDataSource.setError(true)
         viewModelReminder.loadReminders()
-        advanceUntilIdle()
-        var value = viewModelReminder.showSnackBar.getOrAwaitValue()
-        assertThat(value, `is`("Reminder not found!"))
+        assertThat(viewModelReminder.showSnackBar.getOrAwaitValue(), `is`("Location reminders were unable to be retrieved due to exception occurs"))
 
     }
 
 
-    private suspend fun saveReminderFakeData() {
-        reminderDataSource.saveReminder(ReminderDTO("test", "test", "test", 88.00, 88.00))
-    }
+
 
     @Before
     fun prepareViewModel() {
